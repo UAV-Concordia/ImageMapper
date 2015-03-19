@@ -23,11 +23,13 @@ SOURCES += main.cpp\
     imagemapper.cpp \
     marker.cpp \
     camera.cpp \
-    mapview.cpp
+    mapview.cpp \
+    mpconnector.cpp
 
 HEADERS  += imagemapper.h \
     marker.h \
     camera.h \
-    mapview.h
+    mapview.h \
+    mpconnector.h
 
 FORMS    += imagemapper.ui

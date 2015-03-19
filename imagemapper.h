@@ -11,7 +11,7 @@ namespace Ui {
 class ImageMapper;
 }
 
-/*
+/**
  * Main application frame
  */
 class ImageMapper : public QMainWindow
@@ -28,6 +28,10 @@ public slots:
 private:
     void animate(); //fake function for testing
 
+    /**
+     * Get the delay for next capture
+     * @return millisecond to next capture
+     */
     int captureRate();
 
     Ui::ImageMapper *ui;

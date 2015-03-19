@@ -4,6 +4,9 @@
 #include <QGraphicsView>
 #include <QWheelEvent>
 
+/**
+ * Map Widget
+ */
 class MapView : public QGraphicsView
 {
 public:
