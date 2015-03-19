@@ -11,12 +11,23 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = ImageMapper
 TEMPLATE = app
 
+# MS Media Foundation
+LIBS += evr.lib
+LIBS += mf.lib
+LIBS += mfplat.lib
+LIBS += Mfreadwrite.lib
+LIBS += Mfuuid.lib
+LIBS += Ole32.lib
 
 SOURCES += main.cpp\
-        imagemapper.cpp \
-    marker.cpp
+    imagemapper.cpp \
+    marker.cpp \
+    camera.cpp \
+    mapview.cpp
 
 HEADERS  += imagemapper.h \
-    marker.h
+    marker.h \
+    camera.h \
+    mapview.h
 
 FORMS    += imagemapper.ui

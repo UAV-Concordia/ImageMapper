@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QGraphicsScene>
 #include "marker.h"
+#include "mapview.h"
 
 namespace Ui {
 class ImageMapper;
@@ -23,12 +24,14 @@ public:
 
 public slots:
     void redrawMap();
-    void zoomIn();
-    void zoomOut();
 
 private:
+    void animate(); //fake function for testing
+
+    int captureRate();
+
     Ui::ImageMapper *ui;
-    QTimer          *updateMap;
+    QTimer          *updateTimer;
     Marker          *uav;
     QGraphicsScene  *scene;
 };

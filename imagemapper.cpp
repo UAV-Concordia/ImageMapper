@@ -14,24 +14,15 @@ ImageMapper::ImageMapper(QWidget *parent) :
     this->scene->addItem(this->uav);
     ui->graphicsView->setScene(this->scene);
 
-    this->updateMap = new QTimer();
+    this->updateTimer = new QTimer();
 
     // Callbacks
-    connect(this->updateMap, SIGNAL(timeout()), this, SLOT(redrawMap()));
-
-    // Zooming
-    // This should reimplement the GraphicsView to use the wheel
-    QAction *zoomInAction = new QAction(this);
-    QAction *zoomOutAction = new QAction(this);
-    zoomInAction->setShortcut(Qt::Key_Plus | Qt::CTRL);
-    zoomOutAction->setShortcut(Qt::Key_Minus | Qt::CTRL);
-    connect(zoomInAction, SIGNAL(triggered()), this, SLOT(zoomIn()));
-    connect(zoomOutAction, SIGNAL(triggered()), this, SLOT(zoomOut()));
-    this->addAction(zoomInAction);
-    this->addAction(zoomOutAction);
+    connect(this->updateTimer, SIGNAL(timeout()), this, SLOT(redrawMap()));
 
     // Start timer
-    this->updateMap->start(100);
+    this->updateTimer->setSingleShot(true);
+    this->updateTimer->start(captureRate());
+
 }
 
 ImageMapper::~ImageMapper()
@@ -40,16 +31,30 @@ ImageMapper::~ImageMapper()
     delete uav;
 }
 
-// Zoom callback test
-void ImageMapper::zoomIn(){
-    ui->graphicsView->scale(1.2, 1.2);
-}
-void ImageMapper::zoomOut(){
-    ui->graphicsView->scale(0.8, 0.8);
+int ImageMapper::captureRate(){
+    int fps = ui->spinBox->value();
+    return 1000/fps;
 }
 
 // Redraw map called by the timer
 void ImageMapper::redrawMap(){
+    animate();
+
+    // --------------------------------------------
+    // TODO: Get position from Mission Planer
+
+    if(ui->captureButton->isChecked()){
+        // TODO:
+        // Grab frame
+        // Save it to disk
+        // Attach metadata
+
+        // Create and insert a new marker into scene
+    }
+    this->updateTimer->start(captureRate());
+}
+
+void ImageMapper::animate(){
     // Test Animation -- loop
     QPointF pos = this->uav->pos();
 
@@ -84,18 +89,5 @@ void ImageMapper::redrawMap(){
         Marker *m = new Marker();
         m->setPos(pos);
         this->scene->addItem(m);
-    }
-
-
-    // --------------------------------------------
-    // TODO: Get position from Mission Planer
-
-    if(ui->captureButton->isChecked()){
-        // TODO:
-        // Grab frame
-        // Save it to disk
-        // Attach metadata
-
-        // Create and insert a new marker into scene
     }
 }
