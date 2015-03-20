@@ -3,7 +3,9 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <QLabel>
 #include <QGraphicsScene>
+#include <QDialog>
 #include "marker.h"
 #include "mapview.h"
 
@@ -30,6 +32,8 @@ private slots:
 
     void on_actionCapture_device_triggered();
 
+    void on_actionCamera_view_triggered();
+
 private:
     void animate(); //fake function for testing
 
@@ -44,6 +48,8 @@ private:
     Marker          *uav;
     QGraphicsScene  *scene;
     QString         destinationFolder;
+    QLabel          *liveFeed;
+    QDialog         *liveView;
 };
 
 #endif // IMAGEMAPPER_H

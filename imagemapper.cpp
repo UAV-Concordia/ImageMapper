@@ -2,6 +2,7 @@
 #include "ui_imagemapper.h"
 #include <QFileDialog>
 #include <iostream>
+#include <QLabel>
 #include "capturedevicedialog.h"
 
 ImageMapper::ImageMapper(QWidget *parent) :
@@ -9,6 +10,16 @@ ImageMapper::ImageMapper(QWidget *parent) :
     ui(new Ui::ImageMapper)
 {
     ui->setupUi(this);
+
+    // Live view
+    liveFeed = new QLabel();
+    liveView = new QDialog(this);
+
+    QVBoxLayout *lout = new QVBoxLayout(liveView);
+    lout->addWidget(liveFeed);
+    liveView->setLayout(lout);
+    liveView->resize(420,280);
+
 
     // Graphics Scene
     this->scene = new QGraphicsScene(this);
@@ -26,12 +37,16 @@ ImageMapper::ImageMapper(QWidget *parent) :
     this->updateTimer->setSingleShot(true);
     this->updateTimer->start(captureRate());
 
+    this->on_actionDestination_Folder_triggered();
+
 }
 
 ImageMapper::~ImageMapper()
 {
     delete ui;
     delete uav;
+    if(liveFeed != NULL)
+        delete liveFeed;
 }
 
 int ImageMapper::captureRate(){
@@ -53,6 +68,11 @@ void ImageMapper::redrawMap(){
         // Attach metadata
 
         // Create and insert a new marker into scene
+    }
+
+    if(!liveView->isHidden()){
+        // TODO: Set to frame
+        liveFeed->setText("hello!");
     }
     this->updateTimer->start(captureRate());
 }
@@ -111,4 +131,9 @@ void ImageMapper::on_actionCapture_device_triggered()
         // TODO: Set camera device
         dlg.selectedDeviceIndex();
     }
+}
+
+void ImageMapper::on_actionCamera_view_triggered()
+{
+    liveView->show();
 }
