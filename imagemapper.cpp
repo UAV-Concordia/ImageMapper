@@ -1,5 +1,7 @@
 #include "imagemapper.h"
 #include "ui_imagemapper.h"
+#include <QFileDialog>
+#include <iostream>
 
 ImageMapper::ImageMapper(QWidget *parent) :
     QMainWindow(parent),
@@ -22,6 +24,8 @@ ImageMapper::ImageMapper(QWidget *parent) :
     // Start timer
     this->updateTimer->setSingleShot(true);
     this->updateTimer->start(captureRate());
+
+
 
 }
 
@@ -90,4 +94,10 @@ void ImageMapper::animate(){
         m->setPos(pos);
         this->scene->addItem(m);
     }
+}
+
+void ImageMapper::on_actionDestination_Folder_triggered(){
+    QString dest = QFileDialog::getExistingDirectory();
+    if(!dest.isEmpty())
+        this->destinationFolder = dest;
 }

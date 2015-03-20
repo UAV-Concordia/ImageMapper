@@ -25,6 +25,9 @@ public:
 public slots:
     void redrawMap();
 
+private slots:
+    void on_actionDestination_Folder_triggered();
+
 private:
     void animate(); //fake function for testing
 
@@ -38,6 +41,7 @@ private:
     QTimer          *updateTimer;
     Marker          *uav;
     QGraphicsScene  *scene;
+    QString         destinationFolder;
 };
 
 #endif // IMAGEMAPPER_H
