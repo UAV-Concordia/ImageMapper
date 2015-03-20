@@ -28,6 +28,8 @@ public slots:
 private slots:
     void on_actionDestination_Folder_triggered();
 
+    void on_actionCapture_device_triggered();
+
 private:
     void animate(); //fake function for testing
 

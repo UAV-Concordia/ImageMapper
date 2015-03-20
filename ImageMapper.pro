@@ -19,17 +19,23 @@ LIBS += Mfreadwrite.lib
 LIBS += Mfuuid.lib
 LIBS += Ole32.lib
 
+# Socket API
+LIBS += Ws2_32.lib
+
 SOURCES += main.cpp\
     imagemapper.cpp \
     marker.cpp \
     camera.cpp \
     mapview.cpp \
-    mpconnector.cpp
+    mpconnector.cpp \
+    capturedevicedialog.cpp
 
 HEADERS  += imagemapper.h \
     marker.h \
     camera.h \
     mapview.h \
-    mpconnector.h
+    mpconnector.h \
+    capturedevicedialog.h
 
-FORMS    += imagemapper.ui
+FORMS    += imagemapper.ui \
+    capturedevicedialog.ui

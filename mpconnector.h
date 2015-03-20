@@ -28,14 +28,14 @@ public:
      * @param serverName the MP hostname
      * @param port
      */
-    void connect(const char serverName, int port) throw std::exception;
+    void connect(const char *serverName, int port) throw (std::exception);
 
     /**
      * Query the Mission Planner for metadata.
      * This is a blocking call
      * @return the metadata
      */
-    struct MPData getData() throw std::exception;
+    struct MPData getData() throw (std::exception);
 
 private:
     SOCKET socket;

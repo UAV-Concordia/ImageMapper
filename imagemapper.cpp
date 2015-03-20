@@ -2,6 +2,7 @@
 #include "ui_imagemapper.h"
 #include <QFileDialog>
 #include <iostream>
+#include "capturedevicedialog.h"
 
 ImageMapper::ImageMapper(QWidget *parent) :
     QMainWindow(parent),
@@ -24,8 +25,6 @@ ImageMapper::ImageMapper(QWidget *parent) :
     // Start timer
     this->updateTimer->setSingleShot(true);
     this->updateTimer->start(captureRate());
-
-
 
 }
 
@@ -100,4 +99,16 @@ void ImageMapper::on_actionDestination_Folder_triggered(){
     QString dest = QFileDialog::getExistingDirectory();
     if(!dest.isEmpty())
         this->destinationFolder = dest;
+}
+
+void ImageMapper::on_actionCapture_device_triggered()
+{
+    CaptureDeviceDialog dlg;
+    // TODO: Call Camera obj
+    dlg.setCurrentDevice(0);
+    dlg.setNumberDevices(5);
+    if(dlg.exec() == QDialog::Accepted){
+        // TODO: Set camera device
+        dlg.selectedDeviceIndex();
+    }
 }

@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <sstream>
 
-MPConnector::MPConnector(const char serverName, int port)
+MPConnector::MPConnector()
 {
-    WSDATA data;
+    WSADATA data;
     int result;
 
     result = WSAStartup(MAKEWORD(2,2), &data);
@@ -25,7 +25,7 @@ MPConnector::~MPConnector()
     WSACleanup();
 }
 
-void MPConnector::connect(const char serverName, int port) throw std::exception {
+void MPConnector::connect(const char *serverName, int port) throw (std::exception) {
     if(socket != INVALID_SOCKET)
         closesocket(this->socket);
 
@@ -59,7 +59,7 @@ void MPConnector::connect(const char serverName, int port) throw std::exception 
     }
 }
 
-struct MPConnector::MPData MPConnector::getData() throw std::exception{
+struct MPConnector::MPData MPConnector::getData() throw (std::exception){
     MPData data;
     if(socket != INVALID_SOCKET){
         char request = '!'; // Can be anything
