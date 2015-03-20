@@ -7,6 +7,7 @@ Camera::Camera()
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     MFStartup(MF_VERSION);
     this->cam = NULL;
+    this->rgbBuffer = NULL;
 }
 
 Camera::~Camera()
@@ -98,27 +99,28 @@ QImage Camera::getFrame(){
         // Convert to RGB
         // From the test we assumed 2 byte per pixel,
         // a resolution of 640x480 and YUV422 byte layout.
-        BYTE *rgbFrame = new BYTE[(bSize/2)*3];
+        if(rgbBuffer != NULL)delete rgbBuffer;
+        rgbBuffer = new BYTE[(bSize/2)*3];
         for(DWORD i = 0; i< bSize/2; i+=2){
             int y  = (frame[2*i]);
             int u  = (frame[2*i + 1]);
             int y2 = (frame[2*i + 2]);
             int v  = (frame[2*i + 3]);
 
-            rgbFrame[3*i + 0] = (int)getRedComponent  (y, u, v);
-            rgbFrame[3*i + 1] = (int)getGreenComponent(y, u, v);
-            rgbFrame[3*i + 2] = (int)getBlueComponent (y, u, v);
+            rgbBuffer[3*i + 0] = (int)getRedComponent  (y, u, v);
+            rgbBuffer[3*i + 1] = (int)getGreenComponent(y, u, v);
+            rgbBuffer[3*i + 2] = (int)getBlueComponent (y, u, v);
 
-            rgbFrame[3*i + 3] = (int)getRedComponent  (y2, u, v);
-            rgbFrame[3*i + 4] = (int)getGreenComponent(y2, u, v);
-            rgbFrame[3*i + 5] = (int)getBlueComponent (y2, u, v);
+            rgbBuffer[3*i + 3] = (int)getRedComponent  (y2, u, v);
+            rgbBuffer[3*i + 4] = (int)getGreenComponent(y2, u, v);
+            rgbBuffer[3*i + 5] = (int)getBlueComponent (y2, u, v);
         }
 
-        QImage img(rgbFrame, 640, 480, QImage::Format_RGB888);
+        QImage img(rgbBuffer, 640, 480, QImage::Format_RGB888);
         buffer->Unlock();
         buffer->Release();
         sample->Release();
-        delete rgbFrame;
+        //delete rgbFrame;
         return img;
     }
     return QImage();

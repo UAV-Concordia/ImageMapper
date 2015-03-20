@@ -8,6 +8,7 @@
 #include <QDialog>
 #include "marker.h"
 #include "mapview.h"
+#include "camera.h"
 
 namespace Ui {
 class ImageMapper;
@@ -50,6 +51,7 @@ private:
     QString         destinationFolder;
     QLabel          *liveFeed;
     QDialog         *liveView;
+    Camera          *camera;
 };
 
 #endif // IMAGEMAPPER_H

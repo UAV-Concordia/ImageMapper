@@ -48,6 +48,7 @@ public:
     QImage getFrame();
 
 private:
+    BYTE            *rgbBuffer;
     IMFSourceReader *cam;
     float getRedComponent(const float y, const float u, const float v);
     float getGreenComponent(const float y, const float u, const float v);

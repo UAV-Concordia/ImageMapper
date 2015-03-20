@@ -5,12 +5,17 @@
 #include <QLabel>
 #include "capturedevicedialog.h"
 #include "imagemarker.h"
+#include <cstdlib>
 
 ImageMapper::ImageMapper(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ImageMapper)
 {
     ui->setupUi(this);
+
+    // Camera
+    this->camera = new Camera();
+    camera->setDevice(0);
 
     // Live view
     liveFeed = new QLabel();
@@ -46,6 +51,7 @@ ImageMapper::~ImageMapper()
 {
     delete ui;
     delete uav;
+    delete camera;
     if(liveFeed != NULL)
         delete liveFeed;
 }
@@ -61,19 +67,27 @@ void ImageMapper::redrawMap(){
 
     // --------------------------------------------
     // TODO: Get position from Mission Planer
+    QImage frame;
 
     if(ui->captureButton->isChecked()){
         // TODO:
         // Grab frame
+        frame = this->camera->getFrame();
         // Save it to disk
+        QString filename = QString("%1/%2.jpg").arg(this->destinationFolder).arg(rand());
+        frame.save(filename, "JPG");
         // Attach metadata
 
         // Create and insert a new marker into scene
+        Marker *m = new ImageMarker(filename);
+        m->setPos(QPoint(rand()/1000, rand()/1000));
+        this->scene->addItem(m);
     }
 
     if(!liveView->isHidden()){
         // TODO: Set to frame
-        liveFeed->setText("hello!");
+        if(frame.isNull()) frame = camera->getFrame();
+        liveFeed->setPixmap(QPixmap::fromImage(frame));
     }
     this->updateTimer->start(captureRate());
 }
@@ -110,11 +124,11 @@ void ImageMapper::animate(){
         this->uav->setPos(pos.x() - 10, 0);
     }
 
-    if(ui->captureButton->isChecked()){
-        Marker *m = new ImageMarker("No image");
-        m->setPos(pos);
-        this->scene->addItem(m);
-    }
+//    if(ui->captureButton->isChecked()){
+//        Marker *m = new ImageMarker("No image");
+//        m->setPos(pos);
+//        this->scene->addItem(m);
+//    }
 }
 
 void ImageMapper::on_actionDestination_Folder_triggered(){
@@ -128,10 +142,10 @@ void ImageMapper::on_actionCapture_device_triggered()
     CaptureDeviceDialog dlg;
     // TODO: Call Camera obj
     dlg.setCurrentDevice(0);
-    dlg.setNumberDevices(5);
+    dlg.setNumberDevices(camera->getDevices());
     if(dlg.exec() == QDialog::Accepted){
         // TODO: Set camera device
-        dlg.selectedDeviceIndex();
+        camera->setDevice(dlg.selectedDeviceIndex());
     }
 }
 

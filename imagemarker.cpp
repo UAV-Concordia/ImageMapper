@@ -39,7 +39,7 @@ void ImageMarker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event){
 
     QDialog dlg;
     dlg.setLayout(lout);
-    dlg.setModal(true);
+    dlg.setModal(false);
     dlg.exec();
 }
 

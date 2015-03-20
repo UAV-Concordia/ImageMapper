@@ -3,6 +3,9 @@
 
 #include <QDialog>
 
+/**
+ * Dialog to select capturing device
+ */
 namespace Ui {
 class CaptureDeviceDialog;
 }
