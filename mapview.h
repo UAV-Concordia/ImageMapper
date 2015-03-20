@@ -3,6 +3,9 @@
 #include <QWidget>
 #include <QGraphicsView>
 #include <QWheelEvent>
+#include <QGraphicsSceneMouseEvent>
+#include <QPointF>
+#include <QRubberBand>
 
 /**
  * Map Widget

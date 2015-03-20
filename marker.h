@@ -15,10 +15,6 @@ class Marker : public QObject, public QGraphicsRectItem
 public:
     explicit Marker(QBrush brush = QBrush(Qt::red), QObject *parent = 0);
     ~Marker();
-
-signals:
-
-public slots:
 };
 
 #endif // MARKER_H

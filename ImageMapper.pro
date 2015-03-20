@@ -28,14 +28,16 @@ SOURCES += main.cpp\
     camera.cpp \
     mapview.cpp \
     mpconnector.cpp \
-    capturedevicedialog.cpp
+    capturedevicedialog.cpp \
+    imagemarker.cpp
 
 HEADERS  += imagemapper.h \
     marker.h \
     camera.h \
     mapview.h \
     mpconnector.h \
-    capturedevicedialog.h
+    capturedevicedialog.h \
+    imagemarker.h
 
 FORMS    += imagemapper.ui \
     capturedevicedialog.ui

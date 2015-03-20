@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>357</width>
+    <height>305</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -65,7 +65,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>357</width>
      <height>18</height>
     </rect>
    </property>
@@ -76,6 +76,7 @@
     <addaction name="actionDestination_Folder"/>
     <addaction name="actionCapture_device"/>
     <addaction name="actionCamera_view"/>
+    <addaction name="actionExport"/>
    </widget>
    <addaction name="menuSettings"/>
   </widget>
@@ -93,6 +94,11 @@
   <action name="actionCamera_view">
    <property name="text">
     <string>Open Viewer</string>
+   </property>
+  </action>
+  <action name="actionExport">
+   <property name="text">
+    <string>Export</string>
    </property>
   </action>
  </widget>

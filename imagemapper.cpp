@@ -4,6 +4,7 @@
 #include <iostream>
 #include <QLabel>
 #include "capturedevicedialog.h"
+#include "imagemarker.h"
 
 ImageMapper::ImageMapper(QWidget *parent) :
     QMainWindow(parent),
@@ -77,6 +78,7 @@ void ImageMapper::redrawMap(){
     this->updateTimer->start(captureRate());
 }
 
+// TODO: Remove
 void ImageMapper::animate(){
     // Test Animation -- loop
     QPointF pos = this->uav->pos();
@@ -109,7 +111,7 @@ void ImageMapper::animate(){
     }
 
     if(ui->captureButton->isChecked()){
-        Marker *m = new Marker();
+        Marker *m = new ImageMarker("No image");
         m->setPos(pos);
         this->scene->addItem(m);
     }
