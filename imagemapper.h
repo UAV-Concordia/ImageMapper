@@ -35,6 +35,8 @@ private slots:
 
     void on_actionPreferences_triggered();
 
+    void on_listWidget_doubleClicked(const QModelIndex &index);
+
 private:
     void animate(); //fake function for testing
 

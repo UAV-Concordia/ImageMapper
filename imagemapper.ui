@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>499</width>
-    <height>326</height>
+    <width>538</width>
+    <height>279</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,7 +21,11 @@
        <widget class="MapView" name="graphicsView"/>
       </item>
       <item>
-       <widget class="QListView" name="listView"/>
+       <widget class="QListWidget" name="listWidget">
+        <property name="selectionMode">
+         <enum>QAbstractItemView::ExtendedSelection</enum>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -59,7 +63,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>499</width>
+     <width>538</width>
      <height>18</height>
     </rect>
    </property>

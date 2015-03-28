@@ -2,6 +2,7 @@
 #include "ui_imagemapper.h"
 #include <QFileDialog>
 #include <QLabel>
+#include <QListWidgetItem>
 #include <cstdlib>
 #include "imagemarker.h"
 
@@ -112,10 +113,16 @@ void ImageMapper::refresh(){
         //writeMetadata(data);
 
         QString barcode = detectBarcode(frame);
+
+
         // Create and insert a new marker into scene
         Marker *m = new ImageMarker(filename);
         m->setPos(QPoint(rand()/1000, rand()/1000));
         this->scene->addItem(m);
+
+        QListWidgetItem *item = new QListWidgetItem(filename, ui->listWidget);
+        if(!barcode.isEmpty())
+            item->setTextColor(QColor(238,170,0));
     }
 
     // Viewer
@@ -185,4 +192,9 @@ void ImageMapper::on_actionPreferences_triggered()
         this->captureRate = MS(pref.getCaptureRate());
         this->feedRate    = MS(pref.getFeedRate());
     }
+}
+
+void ImageMapper::on_listWidget_doubleClicked(const QModelIndex &index)
+{
+
 }
