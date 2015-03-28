@@ -41,6 +41,9 @@ int Camera::getDevices(){
 }
 
 void Camera::setDevice(int id){
+    if(id == deviceID) return;
+    else deviceID=id;
+
     HRESULT        hr;
     UINT32         count;
     IMFActivate    **devices   = NULL;

@@ -38,7 +38,6 @@ public:
 
 private:
     SOCKET socket;
-    MetaWriter mw;
 };
 
 #endif // MPCONNECTOR_H

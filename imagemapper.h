@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QGraphicsScene>
 #include <QDialog>
+#include <QTime>
 #include "mpconnector.h"
 #include "marker.h"
 #include "mapview.h"
@@ -30,30 +31,38 @@ public slots:
     void refresh();
 
 private slots:
-    void on_actionDestination_Folder_triggered();
-
-    void on_actionCapture_device_triggered();
-
     void on_actionCamera_view_triggered();
+
+    void on_actionPreferences_triggered();
 
 private:
     void animate(); //fake function for testing
 
-    /**
-     * Get the delay for next capture
-     * @return millisecond to next capture
-     */
-    int captureRate();
+    bool isCaptureTimeExceeded();
+    void captureFrame(QImage &frame, QString filename);
+    void writeMetadata(MPConnector::MPData &data);
+    void displayFrame(QImage &frame);
+    void moveUAV(qreal x, qreal y);
 
+    QString detectBarcode(QImage &frame);
+
+    // Widgets
     Ui::ImageMapper *ui;
     QTimer          *updateTimer;
     Marker          *uav;
     QGraphicsScene  *scene;
-    QString         destinationFolder;
     QLabel          *liveFeed;
     QDialog         *liveView;
+
+    // Utils
     Camera          *camera;
     MPConnector     *missionPlanner;
+
+    // Properties
+    QString destinationFolder;
+    int     feedRate;
+    int     captureRate;
+    QTime   lastCapture;
 };
 
 #endif // IMAGEMAPPER_H

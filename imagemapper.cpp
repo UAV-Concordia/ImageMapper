@@ -1,15 +1,22 @@
 #include "imagemapper.h"
 #include "ui_imagemapper.h"
 #include <QFileDialog>
-#include <iostream>
 #include <QLabel>
-#include "capturedevicedialog.h"
-#include "imagemarker.h"
 #include <cstdlib>
+#include "imagemarker.h"
+
+#include "preferencesdialog.h"
+
+#include <QDebug>
+
+#define FPS(ms) (1000.0/(ms))
+#define MS(fps) (1000.0/(fps))
 
 ImageMapper::ImageMapper(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::ImageMapper)
+    ui(new Ui::ImageMapper),
+    captureRate(MS(1)),
+    feedRate(MS(4))
 {
     ui->setupUi(this);
 
@@ -24,7 +31,6 @@ ImageMapper::ImageMapper(QWidget *parent) :
     // Live view
     liveFeed = new QLabel();
     liveView = new QDialog(this);
-
     QVBoxLayout *lout = new QVBoxLayout(liveView);
     lout->addWidget(liveFeed);
     liveView->setLayout(lout);
@@ -33,22 +39,17 @@ ImageMapper::ImageMapper(QWidget *parent) :
 
     // Graphics Scene
     this->scene = new QGraphicsScene(this);
+    // UAV Marker
     this->uav = new Marker(QBrush(Qt::green));
     this->uav->setZValue(1);
     this->scene->addItem(this->uav);
     ui->graphicsView->setScene(this->scene);
 
+    // Refresh
     this->updateTimer = new QTimer();
-
-    // Callbacks
     connect(this->updateTimer, SIGNAL(timeout()), this, SLOT(refresh()));
-
-    // Start timer
     this->updateTimer->setSingleShot(true);
-    this->updateTimer->start(captureRate());
-
-    this->on_actionDestination_Folder_triggered();
-
+    this->updateTimer->start(captureRate);
 }
 
 ImageMapper::~ImageMapper()
@@ -61,39 +62,68 @@ ImageMapper::~ImageMapper()
         delete liveFeed;
 }
 
-int ImageMapper::captureRate(){
-    int fps = ui->spinBox->value();
-    return 1000/fps;
+bool ImageMapper::isCaptureTimeExceeded(){
+    QTime nextCapture = this->lastCapture;
+    nextCapture.addMSecs(captureRate);
+    if(nextCapture < QTime::currentTime()){
+        this->lastCapture = QTime::currentTime();
+        return true;
+    }
+    return false;
+}
+
+void ImageMapper::captureFrame(QImage &frame, QString filename){
+    if(frame.isNull()) frame = camera->getFrame();
+    frame.save(filename, "JPG");
+}
+
+void ImageMapper::writeMetadata(MPConnector::MPData &data){
+    // TODO: Write XML for PIX4D
+}
+
+QString ImageMapper::detectBarcode(QImage &frame){
+    // TODO: Detect barcode, on error return empty string
+    return QString();
+}
+
+void ImageMapper::displayFrame(QImage &frame){
+    if(frame.isNull()) frame = camera->getFrame();
+    liveFeed->setPixmap(QPixmap::fromImage(frame));
+}
+
+void ImageMapper::moveUAV(qreal x, qreal y){
+    this->uav->setPos(x, y);
 }
 
 void ImageMapper::refresh(){
-    animate();
+    animate(); // This is for test will be deleted
 
     // --------------------------------------------
-    // TODO: Get position from Mission Planer
-    QImage frame;
 
-    if(ui->captureButton->isChecked()){
-        // Grab frame
-        frame = this->camera->getFrame();
+    QImage              frame;
+    //MPConnector::MPData data = missionPlanner->getData();
+    //moveUAV();
 
-        // Save it to disk
+    // Capture
+    if(ui->captureButton->isChecked() && isCaptureTimeExceeded()){
+        // Name
         QString filename = QString("%1/%2.jpg").arg(this->destinationFolder).arg(rand());
-        frame.save(filename, "JPG");
-        // Attach metadata
-        missionPlanner->setData(filename.toStdString());
+        captureFrame(frame, filename);
+        //writeMetadata(data);
 
+        QString barcode = detectBarcode(frame);
         // Create and insert a new marker into scene
         Marker *m = new ImageMarker(filename);
         m->setPos(QPoint(rand()/1000, rand()/1000));
         this->scene->addItem(m);
     }
 
+    // Viewer
     if(!liveView->isHidden()){
-        if(frame.isNull()) frame = camera->getFrame();
-        liveFeed->setPixmap(QPixmap::fromImage(frame));
+        displayFrame(frame);
     }
-    this->updateTimer->start(captureRate());
+
+    this->updateTimer->start(feedRate);
 }
 
 // TODO: Remove
@@ -135,23 +165,24 @@ void ImageMapper::animate(){
 //    }
 }
 
-void ImageMapper::on_actionDestination_Folder_triggered(){
-    QString dest = QFileDialog::getExistingDirectory();
-    if(!dest.isEmpty())
-        this->destinationFolder = dest;
-}
-
-void ImageMapper::on_actionCapture_device_triggered()
-{
-    CaptureDeviceDialog dlg;
-    dlg.setCurrentDevice(0);
-    dlg.setNumberDevices(camera->getDevices());
-    if(dlg.exec() == QDialog::Accepted){
-        camera->setDevice(dlg.selectedDeviceIndex());
-    }
-}
-
 void ImageMapper::on_actionCamera_view_triggered()
 {
     liveView->show();
+}
+
+void ImageMapper::on_actionPreferences_triggered()
+{
+    PreferencesDialog pref;
+    // Setup
+    pref.setDestinationFolder(this->destinationFolder);
+    pref.setMaxDeviceIndex(camera->getDevices());
+    pref.setFeedRate(FPS(this->feedRate));
+    pref.setCaptureRate(FPS(this->captureRate));
+
+    if(pref.exec() == QDialog::Accepted){
+        this->destinationFolder = pref.getDestinationFolder();
+        this->camera->setDevice(pref.getDeviceIndex());
+        this->captureRate = MS(pref.getCaptureRate());
+        this->feedRate    = MS(pref.getFeedRate());
+    }
 }

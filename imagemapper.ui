@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>357</width>
-    <height>305</height>
+    <width>499</width>
+    <height>326</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,14 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="MapView" name="graphicsView"/>
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,1">
+      <item>
+       <widget class="MapView" name="graphicsView"/>
+      </item>
+      <item>
+       <widget class="QListView" name="listView"/>
+      </item>
+     </layout>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
@@ -27,19 +34,6 @@
         </property>
         <property name="checkable">
          <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="spinBox">
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>10</number>
-        </property>
-        <property name="value">
-         <number>1</number>
         </property>
        </widget>
       </item>
@@ -65,7 +59,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>357</width>
+     <width>499</width>
      <height>18</height>
     </rect>
    </property>
@@ -73,24 +67,13 @@
     <property name="title">
      <string>Settings</string>
     </property>
-    <addaction name="actionDestination_Folder"/>
-    <addaction name="actionCapture_device"/>
-    <addaction name="actionCamera_view"/>
     <addaction name="actionExport"/>
+    <addaction name="actionCamera_view"/>
+    <addaction name="actionPreferences"/>
    </widget>
    <addaction name="menuSettings"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionCapture_device">
-   <property name="text">
-    <string>Capture device</string>
-   </property>
-  </action>
-  <action name="actionDestination_Folder">
-   <property name="text">
-    <string>Save in ...</string>
-   </property>
-  </action>
   <action name="actionCamera_view">
    <property name="text">
     <string>Open Viewer</string>
@@ -99,6 +82,11 @@
   <action name="actionExport">
    <property name="text">
     <string>Export</string>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="text">
+    <string>Preferences</string>
    </property>
   </action>
  </widget>
