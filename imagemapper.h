@@ -6,6 +6,7 @@
 #include <QLabel>
 #include <QGraphicsScene>
 #include <QDialog>
+#include "mpconnector.h"
 #include "marker.h"
 #include "mapview.h"
 #include "camera.h"
@@ -26,7 +27,7 @@ public:
     ~ImageMapper();
 
 public slots:
-    void redrawMap();
+    void refresh();
 
 private slots:
     void on_actionDestination_Folder_triggered();
@@ -52,6 +53,7 @@ private:
     QLabel          *liveFeed;
     QDialog         *liveView;
     Camera          *camera;
+    MPConnector     *missionPlanner;
 };
 
 #endif // IMAGEMAPPER_H

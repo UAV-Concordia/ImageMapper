@@ -4,7 +4,6 @@
 #include <ws2tcpip.h>
 #include <exception>
 
-
 /**
  * Mission Planner socket wrapper
  */
@@ -39,6 +38,7 @@ public:
 
 private:
     SOCKET socket;
+    MetaWriter mw;
 };
 
 #endif // MPCONNECTOR_H

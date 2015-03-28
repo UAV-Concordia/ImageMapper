@@ -17,8 +17,24 @@ class CaptureDeviceDialog : public QDialog
 public:
     explicit CaptureDeviceDialog(QWidget *parent = 0);
     ~CaptureDeviceDialog();
+
+    /**
+     * Set the device index to use for capture
+     * The index should be between 0 and maxVideoDevices
+     * @param dev index
+     */
     void setCurrentDevice(int dev);
+
+    /**
+     * Set the maximum index allowed for the spinbox
+     * @param maxVideoDevices
+     */
     void setNumberDevices(int maxVideoDevices);
+
+    /**
+     * Retrive the selected device.
+     * @return device index
+     */
     int selectedDeviceIndex();
 
 private:

@@ -76,7 +76,8 @@ void ImageMapper::refresh(){
     if(ui->captureButton->isChecked()){
         // Grab frame
         frame = this->camera->getFrame();
-
+        // Get Mission planner data
+        MPConnector::MPData data = missionPlanner->getData();
         // Save it to disk
         QString filename = QString("%1/%2.jpg").arg(this->destinationFolder).arg(rand());
         frame.save(filename, "JPG");

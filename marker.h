@@ -7,7 +7,7 @@
 
 /**
  * Show a little square in the map.
- * This is meant as marker to signal elements into the map view.
+ * This is meant as marker to display elements into the map view.
  */
 class Marker : public QObject, public QGraphicsRectItem
 {

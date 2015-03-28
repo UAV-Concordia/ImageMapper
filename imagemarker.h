@@ -2,6 +2,10 @@
 #define IMAGEMARKER_H
 #include "marker.h"
 
+/**
+ * Marker representing and images
+ * this call implements some callbacks for mouse event for selection and preview.
+ */
 class ImageMarker : public Marker
 {
 public:
