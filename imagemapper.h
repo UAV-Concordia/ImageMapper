@@ -5,8 +5,8 @@
 #include <QTimer>
 #include <QLabel>
 #include <QGraphicsScene>
-#include <QDialog>
 #include <QTime>
+#include "previewdialog.h"
 #include "mpconnector.h"
 #include "marker.h"
 #include "mapview.h"
@@ -42,7 +42,7 @@ private:
 
     bool isCaptureTimeExceeded();
     void captureFrame(QImage &frame, QString filename);
-    void writeMetadata(MPConnector::MPData &data);
+    void writeMetadata(MPConnector::MPData &data, QString filename);
     void displayFrame(QImage &frame);
     void moveUAV(qreal x, qreal y);
 
@@ -53,8 +53,7 @@ private:
     QTimer          *updateTimer;
     Marker          *uav;
     QGraphicsScene  *scene;
-    QLabel          *liveFeed;
-    QDialog         *liveView;
+    PreviewDialog   *liveView;
 
     // Utils
     Camera          *camera;

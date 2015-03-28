@@ -7,6 +7,7 @@
 #include "imagemarker.h"
 
 #include "preferencesdialog.h"
+#include "previewdialog.h"
 
 #include <QDebug>
 
@@ -30,12 +31,7 @@ ImageMapper::ImageMapper(QWidget *parent) :
     camera->setDevice(0);
 
     // Live view
-    liveFeed = new QLabel();
-    liveView = new QDialog(this);
-    QVBoxLayout *lout = new QVBoxLayout(liveView);
-    lout->addWidget(liveFeed);
-    liveView->setLayout(lout);
-    liveView->resize(420,280);
+    liveView = new PreviewDialog(this);
 
 
     // Graphics Scene
@@ -59,8 +55,7 @@ ImageMapper::~ImageMapper()
     delete uav;
     delete camera;
     delete missionPlanner;
-    if(liveFeed != NULL)
-        delete liveFeed;
+    delete liveView;
 }
 
 bool ImageMapper::isCaptureTimeExceeded(){
@@ -78,7 +73,7 @@ void ImageMapper::captureFrame(QImage &frame, QString filename){
     frame.save(filename, "JPG");
 }
 
-void ImageMapper::writeMetadata(MPConnector::MPData &data){
+void ImageMapper::writeMetadata(MPConnector::MPData &data, QString filename){
     // TODO: Write XML for PIX4D
 }
 
@@ -89,7 +84,7 @@ QString ImageMapper::detectBarcode(QImage &frame){
 
 void ImageMapper::displayFrame(QImage &frame){
     if(frame.isNull()) frame = camera->getFrame();
-    liveFeed->setPixmap(QPixmap::fromImage(frame));
+    liveView->setImage(frame);
 }
 
 void ImageMapper::moveUAV(qreal x, qreal y){
@@ -110,7 +105,7 @@ void ImageMapper::refresh(){
         // Name
         QString filename = QString("%1/%2.jpg").arg(this->destinationFolder).arg(rand());
         captureFrame(frame, filename);
-        //writeMetadata(data);
+        //writeMetadata(data, filename);
 
         QString barcode = detectBarcode(frame);
 
@@ -196,5 +191,8 @@ void ImageMapper::on_actionPreferences_triggered()
 
 void ImageMapper::on_listWidget_doubleClicked(const QModelIndex &index)
 {
-
+    QImage image(index.data().toString());
+    PreviewDialog preview(this);
+    preview.setImage(image);
+    preview.exec();
 }

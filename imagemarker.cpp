@@ -4,6 +4,7 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QPen>
+#include "previewdialog.h"
 
 ImageMarker::ImageMarker(QString filepath)
 {
@@ -32,14 +33,8 @@ void ImageMarker::mousePressEvent(QGraphicsSceneMouseEvent *event){
 
 void ImageMarker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event){
     QImage img (this->pictureFile);
-    QLabel *lb = new QLabel();
-    lb->setPixmap(QPixmap::fromImage(img));
-    QVBoxLayout *lout = new QVBoxLayout();
-    lout->addWidget(lb);
-
-    QDialog dlg;
-    dlg.setLayout(lout);
-    dlg.setModal(false);
+    PreviewDialog dlg;
+    dlg.setImage(img);
     dlg.exec();
 }
 

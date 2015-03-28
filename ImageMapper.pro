@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     mapview.cpp \
     mpconnector.cpp \
     imagemarker.cpp \
-    preferencesdialog.cpp
+    preferencesdialog.cpp \
+    previewdialog.cpp
 
 HEADERS  += imagemapper.h \
     marker.h \
@@ -41,10 +42,12 @@ HEADERS  += imagemapper.h \
     mapview.h \
     mpconnector.h \
     imagemarker.h \
-    preferencesdialog.h
+    preferencesdialog.h \
+    previewdialog.h
 
 FORMS    += imagemapper.ui \
-    preferencesdialog.ui
+    preferencesdialog.ui \
+    previewdialog.ui
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../build-MetaWriter-Desktop_Qt_5_4_1_MSVC2013_32bit-Debug/release/ -lMetaWriter
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../build-MetaWriter-Desktop_Qt_5_4_1_MSVC2013_32bit-Debug/debug/ -lMetaWriter
