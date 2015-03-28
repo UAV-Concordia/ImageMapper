@@ -4,10 +4,10 @@
 #include <QLabel>
 #include <QListWidgetItem>
 #include <cstdlib>
-#include "imagemarker.h"
 
 #include "preferencesdialog.h"
 #include "previewdialog.h"
+#include "captureitem.h"
 
 #include <QDebug>
 
@@ -33,7 +33,6 @@ ImageMapper::ImageMapper(QWidget *parent) :
     // Live view
     liveView = new PreviewDialog(this);
 
-
     // Graphics Scene
     this->scene = new QGraphicsScene(this);
     // UAV Marker
@@ -51,11 +50,13 @@ ImageMapper::ImageMapper(QWidget *parent) :
 
 ImageMapper::~ImageMapper()
 {
-    delete ui;
     delete uav;
     delete camera;
     delete missionPlanner;
     delete liveView;
+    for (int i = 0; i < ui->listWidget->count(); ++i)
+        delete ui->listWidget->item(i);
+    delete ui;
 }
 
 bool ImageMapper::isCaptureTimeExceeded(){
@@ -97,6 +98,7 @@ void ImageMapper::refresh(){
     // --------------------------------------------
 
     QImage              frame;
+    MPConnector::MPData data;
     //MPConnector::MPData data = missionPlanner->getData();
     //moveUAV();
 
@@ -105,19 +107,17 @@ void ImageMapper::refresh(){
         // Name
         QString filename = QString("%1/%2.jpg").arg(this->destinationFolder).arg(rand());
         captureFrame(frame, filename);
-        //writeMetadata(data, filename);
+
 
         QString barcode = detectBarcode(frame);
 
 
-        // Create and insert a new marker into scene
-        Marker *m = new ImageMarker(filename);
-        m->setPos(QPoint(rand()/1000, rand()/1000));
-        this->scene->addItem(m);
-
-        QListWidgetItem *item = new QListWidgetItem(filename, ui->listWidget);
-        if(!barcode.isEmpty())
-            item->setTextColor(QColor(238,170,0));
+        // Create and insert a new capture record
+        CaptureItem *item = new CaptureItem(filename);
+        item->setPos(QPoint(rand()/1000, rand()/1000));
+        this->scene->addItem(item);
+        ui->listWidget->insertItem(ui->listWidget->count(), item);
+        writeMetadata(data, filename); //TODO: use CaptureItem instead
     }
 
     // Viewer
@@ -195,4 +195,20 @@ void ImageMapper::on_listWidget_doubleClicked(const QModelIndex &index)
     PreviewDialog preview(this);
     preview.setImage(image);
     preview.exec();
+}
+
+void ImageMapper::on_listWidget_itemSelectionChanged()
+{
+    QList<QListWidgetItem*> newSelection = ui->listWidget->selectedItems();
+    foreach (QListWidgetItem* t, selectedImages) {
+        if(!newSelection.contains(t)){
+            CaptureItem* it = dynamic_cast<CaptureItem*> (t);
+            if(it) it->select(false);
+        }
+    }
+    selectedImages = newSelection;
+    foreach (QListWidgetItem* t, selectedImages) {
+        CaptureItem* it = dynamic_cast<CaptureItem*> (t);
+        if(it) it->select(true);
+    }
 }

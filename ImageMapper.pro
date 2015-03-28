@@ -32,18 +32,18 @@ SOURCES += main.cpp\
     camera.cpp \
     mapview.cpp \
     mpconnector.cpp \
-    imagemarker.cpp \
     preferencesdialog.cpp \
-    previewdialog.cpp
+    previewdialog.cpp \
+    captureitem.cpp
 
 HEADERS  += imagemapper.h \
     marker.h \
     camera.h \
     mapview.h \
     mpconnector.h \
-    imagemarker.h \
     preferencesdialog.h \
-    previewdialog.h
+    previewdialog.h \
+    captureitem.h
 
 FORMS    += imagemapper.ui \
     preferencesdialog.ui \

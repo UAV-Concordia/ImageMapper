@@ -5,6 +5,8 @@
 #include <QTimer>
 #include <QLabel>
 #include <QGraphicsScene>
+#include <QListWidgetItem>
+#include <QList>
 #include <QTime>
 #include "previewdialog.h"
 #include "mpconnector.h"
@@ -37,6 +39,8 @@ private slots:
 
     void on_listWidget_doubleClicked(const QModelIndex &index);
 
+    void on_listWidget_itemSelectionChanged();
+
 private:
     void animate(); //fake function for testing
 
@@ -64,6 +68,7 @@ private:
     int     feedRate;
     int     captureRate;
     QTime   lastCapture;
+    QList<QListWidgetItem*> selectedImages;
 };
 
 #endif // IMAGEMAPPER_H
