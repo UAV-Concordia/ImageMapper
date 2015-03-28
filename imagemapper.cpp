@@ -11,8 +11,8 @@
 
 #include <QDebug>
 
-#define FPS(ms) (1000.0/(ms))
-#define MS(fps) (1000.0/(fps))
+#define FPS(ms) (2000.0/(ms))
+#define MS(fps) (2000.0/(fps))
 
 ImageMapper::ImageMapper(QWidget *parent) :
     QMainWindow(parent),
@@ -46,6 +46,7 @@ ImageMapper::ImageMapper(QWidget *parent) :
     connect(this->updateTimer, SIGNAL(timeout()), this, SLOT(refresh()));
     this->updateTimer->setSingleShot(true);
     this->updateTimer->start(captureRate);
+    lastCapture.start();
 }
 
 ImageMapper::~ImageMapper()
@@ -60,10 +61,8 @@ ImageMapper::~ImageMapper()
 }
 
 bool ImageMapper::isCaptureTimeExceeded(){
-    QTime nextCapture = this->lastCapture;
-    nextCapture.addMSecs(captureRate);
-    if(nextCapture < QTime::currentTime()){
-        this->lastCapture = QTime::currentTime();
+    if(lastCapture.elapsed() > captureRate){
+        this->lastCapture.restart();
         return true;
     }
     return false;
