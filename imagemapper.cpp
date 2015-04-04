@@ -99,7 +99,7 @@ void ImageMapper::refresh(){
     QImage              frame;
     MPConnector::MPData data;
     //MPConnector::MPData data = missionPlanner->getData();
-    //moveUAV();
+    //moveUAV(data.longitude, data.latitude);
 
     // Capture
     if(ui->captureButton->isChecked() && isCaptureTimeExceeded()){
@@ -114,9 +114,10 @@ void ImageMapper::refresh(){
         // Create and insert a new capture record
         CaptureItem *item = new CaptureItem(filename);
         item->setPos(QPoint(rand()/1000, rand()/1000));
+        //item->setPos(QPoint(data.longitude, data.latitude));
         this->scene->addItem(item);
         ui->listWidget->insertItem(ui->listWidget->count(), item);
-        writeMetadata(data, filename); //TODO: use CaptureItem instead
+        //writeMetadata(data, filename);
     }
 
     // Viewer

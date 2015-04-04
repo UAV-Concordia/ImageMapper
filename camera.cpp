@@ -61,7 +61,7 @@ void Camera::setDevice(int id){
     if(FAILED(hr)) { std::cerr << "Error: Cannot list devices" << std::endl; exit(HRESULT_CODE(hr)); }
 
     if (id >= 0 && id < count){
-        hr = devices[0]->ActivateObject(IID_PPV_ARGS(&mediaSource));
+        hr = devices[id]->ActivateObject(IID_PPV_ARGS(&mediaSource));
         if(FAILED(hr)) { std::cerr << "Error: Cannot allocate Media Source" << std::endl; exit(HRESULT_CODE(hr)); }
 
         if(cam != NULL) cam->Release();
