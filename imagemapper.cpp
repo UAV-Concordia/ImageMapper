@@ -5,189 +5,32 @@
 #include <QListWidgetItem>
 #include <cstdlib>
 
-#include "preferencesdialog.h"
 #include "previewdialog.h"
 #include "captureitem.h"
-
+#include <QFile>
+#include <QTextStream>
 #include <QDebug>
-
-#define FPS(ms) (2000.0/(ms))
-#define MS(fps) (2000.0/(fps))
 
 ImageMapper::ImageMapper(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::ImageMapper),
-    captureRate(MS(1)),
-    feedRate(MS(4))
+    ui(new Ui::ImageMapper)
 {
     ui->setupUi(this);
 
-    // Mission Planner
-    missionPlanner = new MPConnector();
-    missionPlanner->connect("localhost", 49000);
-
-    // Camera
-    this->camera = new Camera();
-    camera->setDevice(0);
-
-    // Live view
-    liveView = new PreviewDialog(this);
-
     // Graphics Scene
     this->scene = new QGraphicsScene(this);
-    // UAV Marker
-    this->uav = new Marker(QBrush(Qt::green));
-    this->uav->setZValue(1);
-    this->scene->addItem(this->uav);
     ui->graphicsView->setScene(this->scene);
-
-    // Refresh
-    this->updateTimer = new QTimer();
-    connect(this->updateTimer, SIGNAL(timeout()), this, SLOT(refresh()));
-    this->updateTimer->setSingleShot(true);
-    this->updateTimer->start(captureRate);
-    lastCapture.start();
 }
 
 ImageMapper::~ImageMapper()
 {
     delete uav;
-    delete camera;
-    delete missionPlanner;
-    delete liveView;
     for (int i = 0; i < ui->listWidget->count(); ++i)
         delete ui->listWidget->item(i);
     delete ui;
 }
 
-bool ImageMapper::isCaptureTimeExceeded(){
-    if(lastCapture.elapsed() > captureRate){
-        this->lastCapture.restart();
-        return true;
-    }
-    return false;
-}
-
-void ImageMapper::captureFrame(QImage &frame, QString filename){
-    if(frame.isNull()) frame = camera->getFrame();
-    frame.save(filename, "JPG");
-}
-
-void ImageMapper::writeMetadata(MPConnector::MPData &data, QString filename){
-    // TODO: Write XML for PIX4D
-}
-
-QString ImageMapper::detectBarcode(QImage &frame){
-    // TODO: Detect barcode, on error return empty string
-    return QString();
-}
-
-void ImageMapper::displayFrame(QImage &frame){
-    if(frame.isNull()) frame = camera->getFrame();
-    liveView->setImage(frame);
-}
-
-void ImageMapper::moveUAV(qreal x, qreal y){
-    this->uav->setPos(x, y);
-}
-
-void ImageMapper::refresh(){
-    animate(); // This is for test will be deleted
-
-    // --------------------------------------------
-
-    QImage              frame;
-    MPConnector::MPData data;
-    //MPConnector::MPData data = missionPlanner->getData();
-    //moveUAV();
-
-    // Capture
-    if(ui->captureButton->isChecked() && isCaptureTimeExceeded()){
-        // Name
-        QString filename = QString("%1/%2.jpg").arg(this->destinationFolder).arg(rand());
-        captureFrame(frame, filename);
-
-
-        QString barcode = detectBarcode(frame);
-
-
-        // Create and insert a new capture record
-        CaptureItem *item = new CaptureItem(filename);
-        item->setPos(QPoint(rand()/1000, rand()/1000));
-        this->scene->addItem(item);
-        ui->listWidget->insertItem(ui->listWidget->count(), item);
-        writeMetadata(data, filename); //TODO: use CaptureItem instead
-    }
-
-    // Viewer
-    if(!liveView->isHidden()){
-        displayFrame(frame);
-    }
-
-    this->updateTimer->start(feedRate);
-}
-
-// TODO: Remove
-void ImageMapper::animate(){
-    // Test Animation -- loop
-    QPointF pos = this->uav->pos();
-
-    // Corners
-    if(pos.x() == 0 && pos.y() == 0){
-        this->uav->setPos(0, 10);
-    }
-    else if(pos.x() == 0 && pos.y() == 100){
-        this->uav->setPos(10, 100);
-    }
-    else if(pos.x() == 100 && pos.y() == 100){
-        this->uav->setPos(100, 90);
-    }
-    else if(pos.x() == 100 && pos.y() == 0){
-        this->uav->setPos(90, 0);
-    }
-    // Edges
-    else if(pos.x() == 0 && pos.y() > 0){
-        this->uav->setPos(0, pos.y() + 10);
-    }
-    else if(pos.x() > 0 && pos.y() == 100){
-        this->uav->setPos(pos.x() + 10, 100);
-    }
-    else if(pos.x() == 100 && pos.y() < 100){
-        this->uav->setPos(100, pos.y() - 10);
-    }
-    else if(pos.x() < 100 && pos.y() == 0){
-        this->uav->setPos(pos.x() - 10, 0);
-    }
-
-//    if(ui->captureButton->isChecked()){
-//        Marker *m = new ImageMarker("No image");
-//        m->setPos(pos);
-//        this->scene->addItem(m);
-//    }
-}
-
-void ImageMapper::on_actionCamera_view_triggered()
-{
-    liveView->show();
-}
-
-void ImageMapper::on_actionPreferences_triggered()
-{
-    PreferencesDialog pref;
-    // Setup
-    pref.setDestinationFolder(this->destinationFolder);
-    pref.setMaxDeviceIndex(camera->getDevices());
-    pref.setFeedRate(FPS(this->feedRate));
-    pref.setCaptureRate(FPS(this->captureRate));
-
-    if(pref.exec() == QDialog::Accepted){
-        this->destinationFolder = pref.getDestinationFolder();
-        this->camera->setDevice(pref.getDeviceIndex());
-        this->captureRate = MS(pref.getCaptureRate());
-        this->feedRate    = MS(pref.getFeedRate());
-    }
-}
-
+// Show selected picture (double click)
 void ImageMapper::on_listWidget_doubleClicked(const QModelIndex &index)
 {
     QImage image(index.data().toString());
@@ -196,6 +39,7 @@ void ImageMapper::on_listWidget_doubleClicked(const QModelIndex &index)
     preview.exec();
 }
 
+// Update list selection
 void ImageMapper::on_listWidget_itemSelectionChanged()
 {
     QList<QListWidgetItem*> newSelection = ui->listWidget->selectedItems();
@@ -210,4 +54,82 @@ void ImageMapper::on_listWidget_itemSelectionChanged()
         CaptureItem* it = dynamic_cast<CaptureItem*> (t);
         if(it) it->select(true);
     }
+}
+
+// Export option
+void ImageMapper::on_actionExport_triggered()
+{
+    QString dest = QFileDialog::getExistingDirectory(this);
+    if(!dest.isEmpty()){
+        QTextStream ss(&dest);
+        foreach (QListWidgetItem* li, selectedImages) {
+            CaptureItem *it = dynamic_cast<CaptureItem*>(li);
+            if(it){
+                ss << it->fileName() << ","
+                   << it->latitude() << ","
+                   << it->longitude() << ","
+                   << it->altitude();
+                endl(ss);
+                QFile::copy(it->fileName(), QString(dest).append(it->fileName()));
+            }
+        }
+    }
+}
+
+// Converting from DMS to GPS coordinate
+static double GPSSystem(QString &dms_coordinate){
+    // "45 deg 29' 42.35"" N"
+    QRegExp rx("(\\d+) deg (\\d+)' (\\d+\\.\\d+)");
+    rx.indexIn(dms_coordinate);
+    int    deg = rx.cap(1).toInt();
+    int    min = rx.cap(2).toInt();
+    double sec = rx.cap(3).toDouble();
+    double gps = deg + (min/60.0) + (sec / 3600.0);
+    qDebug() <<gps;
+    return gps;
+}
+
+// Load option
+void ImageMapper::on_actionLoad_triggered()
+{
+    // Clean up scene
+    this->scene->clear();
+
+    /*
+     * CSV
+     * IMAGE_NAME, x, y
+     */
+    QString csv_path = QFileDialog::getOpenFileName();
+    QFile csv(csv_path);
+    csv.open(QIODevice::ReadOnly);
+
+    double scale_factor = 1000.0; // TODO: zoom factor
+
+    for(int i = 0; ;i++){
+        QByteArray bline = csv.readLine();
+        if(bline.isEmpty())
+            break;
+        QString sline(bline);
+        QStringList cells = sline.split(",");
+        if(cells.size() != 3){
+            qDebug() << "Error parsing line "+i;
+            continue;
+        }
+        // Translate from relative to absolute path
+        QString sp("/"); // TODO: is because are you using Mac?
+        QString rel_image_path = cells.at(0);
+        int idx = rel_image_path.indexOf(sp);
+        QStringRef filename(&rel_image_path, idx, rel_image_path.length() - idx );
+        QStringRef dir(&csv_path, 0, csv_path.lastIndexOf("\\"));
+        QString abs_image_path = dir.toString() + filename.toString();
+        qDebug() << abs_image_path;
+
+        QString y_coordinate = cells.at(1);
+        QString x_coordinate = cells.at(2);
+        CaptureItem *m = new CaptureItem(abs_image_path);
+        m->setPos(GPSSystem(x_coordinate) *scale_factor, GPSSystem(y_coordinate) *scale_factor);
+        this->scene->addItem(m);
+        ui->listWidget->insertItem(ui->listWidget->count(), m);
+    }
+    csv.close();
 }
