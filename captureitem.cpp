@@ -2,6 +2,7 @@
 #include <QColor>
 #include <QPen>
 #include "previewdialog.h"
+#include <QDebug>
 
 CaptureItem::CaptureItem(QString filename, QListWidget *parent):
     QListWidgetItem(filename, parent),
@@ -40,6 +41,7 @@ void CaptureItem::select(bool mark){
 }
 
 void CaptureItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event){
+    qDebug() << "trigged";
     if(event->modifiers() & Qt::ShiftModifier) select(true);
 }
 

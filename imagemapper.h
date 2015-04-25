@@ -31,12 +31,10 @@ private slots:
     void on_listWidget_doubleClicked(const QModelIndex &index);
     void on_listWidget_itemSelectionChanged();
     void on_actionExport_triggered();
-
     void on_actionLoad_triggered();
+    void on_spinBox_scale_valueChanged(int scale_factor);
 
 private:
-    QString detectBarcode(QImage &frame);
-
     // Widgets
     Ui::ImageMapper *ui;
     QTimer          *updateTimer;

@@ -33,9 +33,10 @@ ImageMapper::~ImageMapper()
 // Show selected picture (double click)
 void ImageMapper::on_listWidget_doubleClicked(const QModelIndex &index)
 {
+    qDebug() << index.data().toString();
     QImage image(index.data().toString());
     PreviewDialog preview(this);
-    preview.setImage(image);
+    preview.setImage(image.scaled(640.0,480.0, Qt::KeepAspectRatio));
     preview.exec();
 }
 
@@ -61,16 +62,11 @@ void ImageMapper::on_actionExport_triggered()
 {
     QString dest = QFileDialog::getExistingDirectory(this);
     if(!dest.isEmpty()){
-        QTextStream ss(&dest);
         foreach (QListWidgetItem* li, selectedImages) {
             CaptureItem *it = dynamic_cast<CaptureItem*>(li);
-            if(it){
-                ss << it->fileName() << ","
-                   << it->latitude() << ","
-                   << it->longitude() << ","
-                   << it->altitude();
-                endl(ss);
+            if(it != NULL){
                 QFile::copy(it->fileName(), QString(dest).append(it->fileName()));
+
             }
         }
     }
@@ -84,7 +80,8 @@ static double GPSSystem(QString &dms_coordinate){
     int    deg = rx.cap(1).toInt();
     int    min = rx.cap(2).toInt();
     double sec = rx.cap(3).toDouble();
-    double gps = deg + (min/60.0) + (sec / 3600.0);
+    //double gps = deg + (min/60.0) + (sec / 3600.0);
+    double gps = min + (sec / 60.0); // scale up
     qDebug() <<gps;
     return gps;
 }
@@ -103,7 +100,8 @@ void ImageMapper::on_actionLoad_triggered()
     QFile csv(csv_path);
     csv.open(QIODevice::ReadOnly);
 
-    double scale_factor = 1000.0; // TODO: zoom factor
+    double scale_factor = ui->spinBox_scale->value();
+    qDebug() << scale_factor;
 
     for(int i = 0; ;i++){
         QByteArray bline = csv.readLine();
@@ -116,20 +114,43 @@ void ImageMapper::on_actionLoad_triggered()
             continue;
         }
         // Translate from relative to absolute path
-        QString sp("/"); // TODO: is because are you using Mac?
+        QString sp("/"); // TODO: is '/' because are you using Mac?
         QString rel_image_path = cells.at(0);
         int idx = rel_image_path.indexOf(sp);
         QStringRef filename(&rel_image_path, idx, rel_image_path.length() - idx );
-        QStringRef dir(&csv_path, 0, csv_path.lastIndexOf("\\"));
+        QStringRef dir(&csv_path, 0, csv_path.lastIndexOf(sp));
         QString abs_image_path = dir.toString() + filename.toString();
         qDebug() << abs_image_path;
-
+        // Set coordinates
         QString y_coordinate = cells.at(1);
         QString x_coordinate = cells.at(2);
         CaptureItem *m = new CaptureItem(abs_image_path);
+        m->setLatitude(GPSSystem(y_coordinate));
+        m->setLongitude(GPSSystem(x_coordinate));
         m->setPos(GPSSystem(x_coordinate) *scale_factor, GPSSystem(y_coordinate) *scale_factor);
+        // Add to scene
         this->scene->addItem(m);
+        // Add to list
         ui->listWidget->insertItem(ui->listWidget->count(), m);
     }
     csv.close();
+}
+
+void ImageMapper::on_spinBox_scale_valueChanged(int scale_factor)
+{
+    double avgX=0, avgY=0;
+    double count = scene->items().size();
+    foreach (QGraphicsItem *it, scene->items()) {
+        CaptureItem* item = dynamic_cast<CaptureItem*>(it);
+        if(item != NULL){
+            double x = item->longitude() * scale_factor;
+            double y = item->latitude() * scale_factor;
+            qDebug() << x << ":" << y;
+            avgX += x; avgY += y;
+            it->setPos(x,y);
+        }
+    }
+    avgX /= count;
+    avgY /=count;
+    ui->graphicsView->centerOn(avgX, avgY);
 }
