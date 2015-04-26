@@ -47,7 +47,13 @@ void ImageMapper::on_actionExport_triggered()
     QString dest = QFileDialog::getExistingDirectory(this);
     if(!dest.isEmpty()){
         foreach (Entry* entry, entries) {
-            QFile::copy(entry->path(), QString(dest).append(entry->path()));
+            if(entry->selected()){
+                int start  = entry->path().lastIndexOf("/");
+                QString filename = entry->path().mid(start);
+                qDebug() << "Coping " << entry->path() <<" to " << QString(dest).append(filename);
+                QFile::copy(entry->path(), QString(dest).append(filename));
+            }
+            qDebug() << "Skipping " << entry->path();
         }
     }
 }
