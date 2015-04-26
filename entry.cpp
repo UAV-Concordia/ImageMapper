@@ -78,7 +78,8 @@ void Entry::mark(Qt::CheckState state){
 // Show preview dialog
 void Entry::show(){
     QImage image(this->path());
+    QImage image2 =image.scaled(640.0,480.0, Qt::KeepAspectRatio);
     PreviewDialog preview;
-    preview.setImage(image.scaled(640.0,480.0, Qt::KeepAspectRatio));
+    preview.setImage(image2);
     preview.exec();
 }
