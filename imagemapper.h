@@ -2,14 +2,12 @@
 #define IMAGEMAPPER_H
 
 #include <QMainWindow>
-#include <QTimer>
-#include <QLabel>
 #include <QGraphicsScene>
-#include <QListWidgetItem>
 #include <QList>
-#include <QTime>
 #include "previewdialog.h"
-#include "marker.h"
+#include "entry.h"
+#include "entrymarker.h"
+#include "entrytableitem.h"
 #include "mapview.h"
 
 namespace Ui {
@@ -26,24 +24,19 @@ class ImageMapper : public QMainWindow
 public:
     explicit ImageMapper(QWidget *parent = 0);
     ~ImageMapper();
+    Entry* createEntry(QString &image);
 
 private slots:
-    void on_listWidget_doubleClicked(const QModelIndex &index);
-    void on_listWidget_itemSelectionChanged();
     void on_actionExport_triggered();
-    void on_actionLoad_triggered();
-    void on_spinBox_scale_valueChanged(int scale_factor);
+    void on_actionLoad_triggered();\
+    void on_tableWidget_itemChanged(QTableWidgetItem *item);
+    void on_tableWidget_itemDoubleClicked(QTableWidgetItem *item);
 
 private:
     // Widgets
     Ui::ImageMapper *ui;
-    QTimer          *updateTimer;
-    Marker          *uav;
     QGraphicsScene  *scene;
-
-    // Properties
-    QString destinationFolder;
-    QList<QListWidgetItem*> selectedImages;
+    QList<Entry*> entries;
 };
 
 #endif // IMAGEMAPPER_H

@@ -13,16 +13,19 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
     imagemapper.cpp \
-    marker.cpp \
     mapview.cpp \
     previewdialog.cpp \
-    captureitem.cpp
+    entry.cpp \
+    entrytableitem.cpp \
+    entrymarker.cpp
 
 HEADERS  += imagemapper.h \
-    marker.h \
     mapview.h \
     previewdialog.h \
-    captureitem.h
+    entry.h \
+    entrymediator.h \
+    entrytableitem.h \
+    entrymarker.h
 
 FORMS    += imagemapper.ui \
     previewdialog.ui

@@ -6,7 +6,6 @@
 #include <cstdlib>
 
 #include "previewdialog.h"
-#include "captureitem.h"
 #include <QFile>
 #include <QTextStream>
 #include <QDebug>
@@ -24,37 +23,22 @@ ImageMapper::ImageMapper(QWidget *parent) :
 
 ImageMapper::~ImageMapper()
 {
-    delete uav;
-    for (int i = 0; i < ui->listWidget->count(); ++i)
-        delete ui->listWidget->item(i);
+    foreach (Entry *e, entries) {
+        delete e;
+    }
     delete ui;
 }
 
-// Show selected picture (double click)
-void ImageMapper::on_listWidget_doubleClicked(const QModelIndex &index)
-{
-    qDebug() << index.data().toString();
-    QImage image(index.data().toString());
-    PreviewDialog preview(this);
-    preview.setImage(image.scaled(640.0,480.0, Qt::KeepAspectRatio));
-    preview.exec();
-}
-
-// Update list selection
-void ImageMapper::on_listWidget_itemSelectionChanged()
-{
-    QList<QListWidgetItem*> newSelection = ui->listWidget->selectedItems();
-    foreach (QListWidgetItem* t, selectedImages) {
-        if(!newSelection.contains(t)){
-            CaptureItem* it = dynamic_cast<CaptureItem*> (t);
-            if(it) it->select(false);
-        }
-    }
-    selectedImages = newSelection;
-    foreach (QListWidgetItem* t, selectedImages) {
-        CaptureItem* it = dynamic_cast<CaptureItem*> (t);
-        if(it) it->select(true);
-    }
+Entry* ImageMapper::createEntry(QString &image){
+    Entry          *entry  = new Entry(image);
+    EntryTableItem *item   = new EntryTableItem(image, entry);
+    EntryMarker    *marker = new EntryMarker(entry);
+    int row = entries.size();
+    ui->tableWidget->setRowCount(row+1);
+    ui->tableWidget->setItem(row, 0, item);
+    scene->addItem(marker);
+    entries.append(entry);
+    return entry;
 }
 
 // Export option
@@ -62,12 +46,8 @@ void ImageMapper::on_actionExport_triggered()
 {
     QString dest = QFileDialog::getExistingDirectory(this);
     if(!dest.isEmpty()){
-        foreach (QListWidgetItem* li, selectedImages) {
-            CaptureItem *it = dynamic_cast<CaptureItem*>(li);
-            if(it != NULL){
-                QFile::copy(it->fileName(), QString(dest).append(it->fileName()));
-
-            }
+        foreach (Entry* entry, entries) {
+            QFile::copy(entry->path(), QString(dest).append(entry->path()));
         }
     }
 }
@@ -80,9 +60,8 @@ static double GPSSystem(QString &dms_coordinate){
     int    deg = rx.cap(1).toInt();
     int    min = rx.cap(2).toInt();
     double sec = rx.cap(3).toDouble();
-    //double gps = deg + (min/60.0) + (sec / 3600.0);
-    double gps = min + (sec / 60.0); // scale up
-    qDebug() <<gps;
+    double gps = deg + (min/60.0) + (sec / 3600.0);
+    qDebug() << gps;
     return gps;
 }
 
@@ -100,9 +79,6 @@ void ImageMapper::on_actionLoad_triggered()
     QFile csv(csv_path);
     csv.open(QIODevice::ReadOnly);
 
-    double scale_factor = ui->spinBox_scale->value();
-    qDebug() << scale_factor;
-
     for(int i = 0; ;i++){
         QByteArray bline = csv.readLine();
         if(bline.isEmpty())
@@ -114,7 +90,7 @@ void ImageMapper::on_actionLoad_triggered()
             continue;
         }
         // Translate from relative to absolute path
-        QString sp("/"); // TODO: is '/' because are you using Mac?
+        QString sp("/");
         QString rel_image_path = cells.at(0);
         int idx = rel_image_path.indexOf(sp);
         QStringRef filename(&rel_image_path, idx, rel_image_path.length() - idx );
@@ -124,33 +100,24 @@ void ImageMapper::on_actionLoad_triggered()
         // Set coordinates
         QString y_coordinate = cells.at(1);
         QString x_coordinate = cells.at(2);
-        CaptureItem *m = new CaptureItem(abs_image_path);
-        m->setLatitude(GPSSystem(y_coordinate));
-        m->setLongitude(GPSSystem(x_coordinate));
-        m->setPos(GPSSystem(x_coordinate) *scale_factor, GPSSystem(y_coordinate) *scale_factor);
-        // Add to scene
-        this->scene->addItem(m);
-        // Add to list
-        ui->listWidget->insertItem(ui->listWidget->count(), m);
+        // Add entry
+        Entry *e = createEntry(abs_image_path);
+        e->setPosition(GPSSystem(x_coordinate),GPSSystem(y_coordinate));
     }
     csv.close();
 }
 
-void ImageMapper::on_spinBox_scale_valueChanged(int scale_factor)
+void ImageMapper::on_tableWidget_itemChanged(QTableWidgetItem *item)
 {
-    double avgX=0, avgY=0;
-    double count = scene->items().size();
-    foreach (QGraphicsItem *it, scene->items()) {
-        CaptureItem* item = dynamic_cast<CaptureItem*>(it);
-        if(item != NULL){
-            double x = item->longitude() * scale_factor;
-            double y = item->latitude() * scale_factor;
-            qDebug() << x << ":" << y;
-            avgX += x; avgY += y;
-            it->setPos(x,y);
-        }
-    }
-    avgX /= count;
-    avgY /=count;
-    ui->graphicsView->centerOn(avgX, avgY);
+    EntryTableItem *eItem = dynamic_cast<EntryTableItem*>(item);
+    if(eItem->checkState() == Qt::Checked)
+        eItem->setCheckState(Qt::Checked);
+    else
+        eItem->setCheckState(Qt::Unchecked);
+}
+
+void ImageMapper::on_tableWidget_itemDoubleClicked(QTableWidgetItem *item)
+{
+    EntryTableItem *eItem = dynamic_cast<EntryTableItem*>(item);
+    eItem->show();
 }
